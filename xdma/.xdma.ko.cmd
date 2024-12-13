@@ -1,0 +1,1 @@
+cmd_/home/user/workspaces/mram_communication/xdma/xdma.ko := ld -r -m elf_x86_64 -T ./scripts/module-common.lds --build-id  -o /home/user/workspaces/mram_communication/xdma/xdma.ko /home/user/workspaces/mram_communication/xdma/xdma.o /home/user/workspaces/mram_communication/xdma/xdma.mod.o
