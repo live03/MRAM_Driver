@@ -43,8 +43,16 @@
 #define CTRL_REG_STATUS_SUCCESS 0
 
 #define BRAM_ADDR_OFFSET 0xC0000000
-// res data start offset, also means max instruction size,cur is 1M
-#define RES_DATA_START_OFFSET 0x1000
+// Memory is divided into instruction areas and data areas
+// total memroy space is 1MB, memory map as follows:
+// 0x0000_0000 ~ 0x0007_FFFF --> data areas
+// 0x0008_0000 ~ 0x000B_FFFF --> instruction areas
+// 0x000C_0000 ~ 0x00FF_FFFF --> res data areas
+// over 0x0010_0000 means out of memory area
+//
+// DATA_AREA_START_OFFSET means data area start offset, also means max instruction area size
+#define INST_AREA_START_OFFSET 0x00080000
+#define RES_DATA_AREA_START_OFFSET 0x000C0000
 
 #define REG_WEIGHT_GRANULARITY_OFFSET 0x00
 #define REG_INPUT_GRANULARITY_OFFSET 0x04
@@ -115,6 +123,16 @@ typedef union Controll_Command_T
     Addr_Command addr;
     End_Command end;
 } Controll_Command;
+
+typedef struct Calc_Result_T
+{
+    int32_t cylce_num : 12;
+    int32_t data4 : 25;
+    int32_t data3 : 25;
+    int32_t data2 : 25;
+    int32_t data1 : 25;
+};
+
 // ****************************************************************************************************
 
 #endif

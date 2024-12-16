@@ -140,6 +140,7 @@ int Recv(char *send_device_name, char *recv_device_name, int macro_row, int macr
  * Load("/dev/xdma0_c2h_0", res_addr, calc_result, 4);
  *
  * @param device_name the device to be opened, eg. /dev/xdma0_h2c_0
+ * @param recv_device_name the device opened to receive read data, eg. /dev/xdma0_c2h_0
  * @param input_vector input vector array, each element is 32bit. Array shape is [actived_macro_row_num][in_group][inbits][16].
  * @param input_size identifies the length of param 'input_vector', in 32bits
  * @param inbits the bit width of all input element. Determined by the maximum value in the input vector.
@@ -148,10 +149,10 @@ int Recv(char *send_device_name, char *recv_device_name, int macro_row, int macr
  * @param macro_col value range is [0, 4]. If it's 4, means all col open, otherwise open the specified col.
  * @param mram_addr start address of weight matrix
  * @param wbits the bit width of all weight matrix element. Determined by the maximum value in the weight matrix.
- * @param device_ram_addr the RAM address of the calculation result
+ * @param host_data_addr the host address of the calculation result, length is in_group * actived_macro_num * 4
  * @return int not zero means error
  */
-int Vmmul(char *device_name, unsigned int *input_vector, int input_size, int inbits, int in_group, int macro_row, int macro_col, int mram_addr, int wbits, int device_ram_addr);
+int Vmmul(char *device_name, char *recv_device_name, unsigned int *input_vector, int input_size, int inbits, int in_group, int macro_row, int macro_col, int mram_addr, int wbits, int *host_data_addr);
 
 /**
  * @brief Vector vector dot product. One vector is from onborad RAM, the other is from Macro. Result are stored in the
