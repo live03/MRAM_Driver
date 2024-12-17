@@ -1,8 +1,8 @@
-cmd_/home/user/workspaces/mram_communication/xdma/cdev_sgdma.o := gcc -Wp,-MD,/home/user/workspaces/mram_communication/xdma/.cdev_sgdma.o.d  -nostdinc -isystem /opt/rh/devtoolset-11/root/usr/lib/gcc/x86_64-redhat-linux/11/include -I./arch/x86/include -Iarch/x86/include/generated  -Iinclude -I./arch/x86/include/uapi -Iarch/x86/include/generated/uapi -I./include/uapi -Iinclude/generated/uapi -include ./include/linux/kconfig.h -D__KERNEL__ -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -Werror-implicit-function-declaration -Wno-format-security -fno-delete-null-pointer-checks -std=gnu89 -O2 -m64 -mno-mmx -mno-sse -mpreferred-stack-boundary=3 -mtune=generic -mno-red-zone -mcmodel=kernel -funit-at-a-time -maccumulate-outgoing-args -Wframe-larger-than=2048 -DCONFIG_AS_CFI=1 -DCONFIG_AS_CFI_SIGNAL_FRAME=1 -DCONFIG_AS_CFI_SECTIONS=1 -DCONFIG_AS_FXSAVEQ=1 -DCONFIG_AS_AVX=1 -DCONFIG_AS_AVX2=1 -DCONFIG_AS_AVX512=1 -DCONFIG_AS_SHA1_NI=1 -DCONFIG_AS_SHA256_NI=1 -pipe -Wno-sign-compare -fno-asynchronous-unwind-tables -mno-sse -mno-mmx -mno-sse2 -mno-3dnow -mno-avx -mindirect-branch=thunk-extern -mindirect-branch-register -mfunction-return=thunk-extern -DRETPOLINE -Wframe-larger-than=2048 -fstack-protector-strong -Wno-unused-but-set-variable -fno-omit-frame-pointer -fno-optimize-sibling-calls -g -pg -mfentry -DCC_USING_FENTRY -fno-inline-functions-called-once -Wdeclaration-after-statement -Wno-pointer-sign -fno-strict-overflow -fconserve-stack -DCC_HAVE_ASM_GOTO -I/home/user/workspaces/mram_communication/include  -DMODULE  -D"KBUILD_STR(s)=\#s" -D"KBUILD_BASENAME=KBUILD_STR(cdev_sgdma)"  -D"KBUILD_MODNAME=KBUILD_STR(xdma)" -c -o /home/user/workspaces/mram_communication/xdma/.tmp_cdev_sgdma.o /home/user/workspaces/mram_communication/xdma/cdev_sgdma.c
+cmd_/home/user/workspaces/cpp/MRAM_Driver/xdma/cdev_sgdma.o := gcc -Wp,-MD,/home/user/workspaces/cpp/MRAM_Driver/xdma/.cdev_sgdma.o.d  -nostdinc -isystem /opt/rh/devtoolset-11/root/usr/lib/gcc/x86_64-redhat-linux/11/include -I./arch/x86/include -Iarch/x86/include/generated  -Iinclude -I./arch/x86/include/uapi -Iarch/x86/include/generated/uapi -I./include/uapi -Iinclude/generated/uapi -include ./include/linux/kconfig.h -D__KERNEL__ -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -Werror-implicit-function-declaration -Wno-format-security -fno-delete-null-pointer-checks -std=gnu89 -O2 -m64 -mno-mmx -mno-sse -mpreferred-stack-boundary=3 -mtune=generic -mno-red-zone -mcmodel=kernel -funit-at-a-time -maccumulate-outgoing-args -Wframe-larger-than=2048 -DCONFIG_AS_CFI=1 -DCONFIG_AS_CFI_SIGNAL_FRAME=1 -DCONFIG_AS_CFI_SECTIONS=1 -DCONFIG_AS_FXSAVEQ=1 -DCONFIG_AS_AVX=1 -DCONFIG_AS_AVX2=1 -DCONFIG_AS_AVX512=1 -DCONFIG_AS_SHA1_NI=1 -DCONFIG_AS_SHA256_NI=1 -pipe -Wno-sign-compare -fno-asynchronous-unwind-tables -mno-sse -mno-mmx -mno-sse2 -mno-3dnow -mno-avx -mindirect-branch=thunk-extern -mindirect-branch-register -mfunction-return=thunk-extern -DRETPOLINE -Wframe-larger-than=2048 -fstack-protector-strong -Wno-unused-but-set-variable -fno-omit-frame-pointer -fno-optimize-sibling-calls -g -pg -mfentry -DCC_USING_FENTRY -fno-inline-functions-called-once -Wdeclaration-after-statement -Wno-pointer-sign -fno-strict-overflow -fconserve-stack -DCC_HAVE_ASM_GOTO -I/home/user/workspaces/cpp/MRAM_Driver/include  -DMODULE  -D"KBUILD_STR(s)=\#s" -D"KBUILD_BASENAME=KBUILD_STR(cdev_sgdma)"  -D"KBUILD_MODNAME=KBUILD_STR(xdma)" -c -o /home/user/workspaces/cpp/MRAM_Driver/xdma/.tmp_cdev_sgdma.o /home/user/workspaces/cpp/MRAM_Driver/xdma/cdev_sgdma.c
 
-source_/home/user/workspaces/mram_communication/xdma/cdev_sgdma.o := /home/user/workspaces/mram_communication/xdma/cdev_sgdma.c
+source_/home/user/workspaces/cpp/MRAM_Driver/xdma/cdev_sgdma.o := /home/user/workspaces/cpp/MRAM_Driver/xdma/cdev_sgdma.c
 
-deps_/home/user/workspaces/mram_communication/xdma/cdev_sgdma.o := \
+deps_/home/user/workspaces/cpp/MRAM_Driver/xdma/cdev_sgdma.o := \
   include/linux/types.h \
     $(wildcard include/config/uid16.h) \
     $(wildcard include/config/lbdaf.h) \
@@ -812,7 +812,7 @@ deps_/home/user/workspaces/mram_communication/xdma/cdev_sgdma.o := \
     $(wildcard include/config/security/selinux.h) \
   include/linux/kthread.h \
   include/generated/uapi/linux/version.h \
-  /home/user/workspaces/mram_communication/include/libxdma_api.h \
+  /home/user/workspaces/cpp/MRAM_Driver/include/libxdma_api.h \
   include/linux/scatterlist.h \
     $(wildcard include/config/debug/sg.h) \
     $(wildcard include/config/sg/pool.h) \
@@ -851,9 +851,9 @@ deps_/home/user/workspaces/mram_communication/xdma/cdev_sgdma.o := \
     $(wildcard include/config/profiling.h) \
   arch/x86/include/asm/sections.h \
   include/asm-generic/sections.h \
-  /home/user/workspaces/mram_communication/xdma/xdma_cdev.h \
+  /home/user/workspaces/cpp/MRAM_Driver/xdma/xdma_cdev.h \
   include/linux/uaccess.h \
-  /home/user/workspaces/mram_communication/xdma/xdma_mod.h \
+  /home/user/workspaces/cpp/MRAM_Driver/xdma/xdma_mod.h \
   include/linux/module.h \
     $(wildcard include/config/dynamic/ftrace.h) \
     $(wildcard include/config/module/sig.h) \
@@ -1013,13 +1013,13 @@ deps_/home/user/workspaces/mram_communication/xdma/cdev_sgdma.o := \
   include/linux/pci-dma-compat.h \
   include/linux/splice.h \
   include/linux/pipe_fs_i.h \
-  /home/user/workspaces/mram_communication/xdma/libxdma.h \
+  /home/user/workspaces/cpp/MRAM_Driver/xdma/libxdma.h \
     $(wildcard include/config/bar/num.h) \
     $(wildcard include/config/block/id.h) \
-  /home/user/workspaces/mram_communication/xdma/xdma_thread.h \
+  /home/user/workspaces/cpp/MRAM_Driver/xdma/xdma_thread.h \
   include/linux/cpuset.h \
-  /home/user/workspaces/mram_communication/xdma/cdev_sgdma.h \
+  /home/user/workspaces/cpp/MRAM_Driver/xdma/cdev_sgdma.h \
 
-/home/user/workspaces/mram_communication/xdma/cdev_sgdma.o: $(deps_/home/user/workspaces/mram_communication/xdma/cdev_sgdma.o)
+/home/user/workspaces/cpp/MRAM_Driver/xdma/cdev_sgdma.o: $(deps_/home/user/workspaces/cpp/MRAM_Driver/xdma/cdev_sgdma.o)
 
-$(deps_/home/user/workspaces/mram_communication/xdma/cdev_sgdma.o):
+$(deps_/home/user/workspaces/cpp/MRAM_Driver/xdma/cdev_sgdma.o):

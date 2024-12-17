@@ -14,6 +14,7 @@
 #include <time.h>
 #include <errno.h>
 #include <sys/types.h>
+#include "mram_config.h"
 /*
  * man 2 write:
  * On Linux, write() (and similar system calls) will transfer at most
@@ -23,7 +24,6 @@
  */
 
 #define RW_MAX_SIZE	0x7ffff000
-#define BRAM_ADDR_OFFSET 0xC0000000
 
 int verbose = 0;
 

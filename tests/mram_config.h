@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#define DEBUG_MODE
+#define DEBUG_MODE 0
 
 // common device name
 #define H2C_DEVICE "/dev/xdma0_h2c_0"
@@ -41,6 +41,7 @@
 
 // status reg type
 #define CTRL_REG_STATUS_SUCCESS 0
+#define CTRL_REG_STATUS_TIMEOUT 5
 
 #define REG_ADDR_OFFSET 0x40000000
 #define BRAM_ADDR_OFFSET 0xC0000000
@@ -115,6 +116,9 @@ typedef struct End_Command_T
 } End_Command;
 
 extern End_Command END_CMD;
+extern End_Command PLL_RESET_CMD;
+extern End_Command PLL_SET_CMD;
+extern End_Command CTRL_RESET_CMD;
 
 typedef union Controll_Command_T
 {
