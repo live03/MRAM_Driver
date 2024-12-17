@@ -1,19 +1,13 @@
 CC ?= gcc
 name = mram_api
 
-all: dll
+all: mram_test
 
-mram_test: mram_test.o mram_api.o dma_utils.o
-	$(CC) -o $@ $^ -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_LARGE_FILE_SOURCE
+mram_test: mram_test.o
+	$(CC) -o $@ $^ -L ./ -lmram_api -Wimplicit-function-declaration -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_LARGE_FILE_SOURCE
 
 %.o: %.c
-	$(CC) -c -std=c99 -o $@ $< -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_LARGE_FILE_SOURCE
-
-#动态库制作:默认源文件放在src文件夹
-dll: lib$(name).so
-	@echo make shared lib success
-lib$(name).so: *.c
-	$(CC) -fPIC -shared $^ -o $@ $(CFLAGS)
+	$(CC) -c -std=c99 -o $@ $< -Wimplicit-function-declaration -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D_LARGE_FILE_SOURCE
 
 clean:
 	rm -rf *.o *.bin mram_test

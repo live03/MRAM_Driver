@@ -35,7 +35,7 @@ Addr_Command ADDR_CMD = {0, 0, CODE_ADDR};
 End_Command END_CMD = {0x015555, CODE_ENDINS};
 
 // global Instruction Address Register
-static uint32_t IAR = INST_AREA_START_OFFSET;
+uint32_t IAR = INST_AREA_START_OFFSET;
 
 //****************************************print message******************************************************** */
 
@@ -79,7 +79,7 @@ typedef struct mmap_reg_param_t
 {
     int err;
     int fd;
-    int *map;
+    void *map;
 } mmap_reg_param;
 
 /**
@@ -94,7 +94,7 @@ mmap_reg_param map_reg(char *device_name, int reg_addr)
     int fd;
     off_t target = reg_addr;
     off_t target_aligned, offset;
-    int *map;
+    void *map;
     mmap_reg_param res = {0, 0, 0};
 
     // check for target page alignment
@@ -119,7 +119,7 @@ mmap_reg_param map_reg(char *device_name, int reg_addr)
     // only map to the specified address and the last four bytes
     // map = mmap(NULL, offset + 4, PROT_READ | PROT_WRITE, MAP_SHARED, fd, target_aligned);
     map = mmap(NULL, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, target_aligned);
-    if (map == (int *)-1)
+    if (map == (void *)-1)
     {
         fprintf(stderr, "Memory 0x%lx mapped failed: %s.\n",
                 target, strerror(errno));
@@ -150,7 +150,7 @@ int umap_reg(mmap_reg_param mrp, int reg_addr)
 
 int Sldi(char *device_name, unsigned int imm, int reg_addr)
 {
-    int *map;
+    void *map;
 
     mmap_reg_param mrp = map_reg(device_name, reg_addr);
     if (mrp.err)
@@ -161,7 +161,7 @@ int Sldi(char *device_name, unsigned int imm, int reg_addr)
            (unsigned int)imm, reg_addr, map);
     /* swap 32-bit endianess if host is not little-endian */
     imm = htoll(imm);
-    *((uint32_t *)map + reg_addr) = imm;
+    *((uint32_t *)(map + reg_addr)) = imm;
 
     return umap_reg(mrp, reg_addr);
 }
@@ -169,7 +169,7 @@ int Sldi(char *device_name, unsigned int imm, int reg_addr)
 int Sld(char *device_name, int reg_addr_from, int reg_addr_to)
 {
     int err;
-    int *map_from, *map_to;
+    void *map_from, *map_to;
     off_t target_aligned_from, target_aligned_to;
     mmap_reg_param mrp_from, mrp_to;
 
@@ -187,7 +187,7 @@ int Sld(char *device_name, int reg_addr_from, int reg_addr_to)
     printf("move 32-bit reg value from 0x%lx (0x%p) to 0x%lx (0x%p)\n",
            reg_addr_from, map_from, reg_addr_to, map_to);
 
-    *((uint32_t *)map_to + reg_addr_to) = *((uint32_t *)map_from + reg_addr_from);
+    *((uint32_t *)(map_to + reg_addr_to)) = *((uint32_t *)(map_from + reg_addr_from));
 
     err = umap_reg(mrp_from, reg_addr_from);
     err = err | umap_reg(mrp_to, reg_addr_to);
@@ -197,7 +197,7 @@ int Sld(char *device_name, int reg_addr_from, int reg_addr_to)
 
 int Ldr(char *device_name, int reg_addr, unsigned int *host_addr)
 {
-    int *map;
+    void *map;
 
     mmap_reg_param mrp = map_reg(device_name, reg_addr);
     if (mrp.err)
@@ -212,13 +212,13 @@ int Ldr(char *device_name, int reg_addr, unsigned int *host_addr)
     return umap_reg(mrp, reg_addr);
 }
 
-static int ring_ctrl(int start_type, int addr, int len)
+int ring_ctrl(int start_type, int addr, int len)
 {
     int i, each_addr, each_len;
     int total_count = len * 4;
     int left_count = len % 128 == 0 ? len / 128 : len / 128 + 1;
     mmap_reg_param mrp;
-    int *map;
+    void *map;
     // mmap to regs
     mrp = map_reg(CTRL_DEVICE, CTRL_REG_START_OFFSET);
     if (mrp.err)
@@ -232,17 +232,17 @@ static int ring_ctrl(int start_type, int addr, int len)
         // write LEN and ADDR regs
         printf("Write (addr, len) : (0x%08x, %d) to reg (0x%lx, 0x%lx) (0x%p)\n",
                each_addr, each_len * 4, CTRL_REG_ADDR_OFFSET, CTRL_REG_LEN_OFFSET, map);
-        *((uint32_t *)map + CTRL_REG_ADDR_OFFSET) = htoll(each_addr);
-        *((uint32_t *)map + CTRL_REG_LEN_OFFSET) = htoll(each_len);
+        *((uint32_t *)(map + CTRL_REG_ADDR_OFFSET)) = htoll(each_addr);
+        *((uint32_t *)(map + CTRL_REG_LEN_OFFSET)) = htoll(each_len);
 
         // write START reg
         printf("Write start value 0x%08x to 0x%lx (0x%p)\n",
                start_type, CTRL_REG_START_OFFSET, map);
         /* swap 32-bit endianess if host is not little-endian */
-        *((uint32_t *)map + CTRL_REG_START_OFFSET) = htoll(start_type);
+        *((uint32_t *)(map + CTRL_REG_START_OFFSET)) = htoll(start_type);
 
         // read status
-        while (*((uint32_t *)map + CTRL_REG_STATUS_OFFSET) != CTRL_REG_STATUS_SUCCESS)
+        while (*((uint32_t *)(map + CTRL_REG_STATUS_OFFSET)) != CTRL_REG_STATUS_SUCCESS)
             ;
     }
 
@@ -262,7 +262,7 @@ int Vwrite(char *device_name, int macro_row, int macro_col, int ip_addr, int mra
 
 //****************************************Host <---> Device RAM************************************************ */
 // Allow data to be stored anywhere in the onboard RAM
-static int Load_Everywhere(char *device_name, int device_ram_addr, unsigned int *host_addr, int data_size)
+int Load_Everywhere(char *device_name, int device_ram_addr, unsigned int *host_addr, int data_size)
 {
     int fd;
     ssize_t rc = 0;
@@ -314,7 +314,7 @@ int Load(char *device_name, int device_ram_addr, unsigned int *host_addr, int da
 }
 
 // Allow data to be stored anywhere in the onboard RAM
-static int Store_Everywhere(char *device_name, int device_ram_addr, unsigned int *host_addr, int data_size)
+ int Store_Everywhere(char *device_name, int device_ram_addr, unsigned int *host_addr, int data_size)
 {
     int fd;
     ssize_t rc = 0;

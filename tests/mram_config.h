@@ -8,7 +8,7 @@
 // common device name
 #define H2C_DEVICE "/dev/xdma0_h2c_0"
 #define C2H_DEVICE "/dev/xdma0_c2h_0"
-#define CTRL_DEVICE "/dev/xdma0_control"
+#define CTRL_DEVICE "/dev/xdma0_user"
 
 #define FIFO_LENGTH 16
 
@@ -42,24 +42,25 @@
 // status reg type
 #define CTRL_REG_STATUS_SUCCESS 0
 
+#define REG_ADDR_OFFSET 0x40000000
 #define BRAM_ADDR_OFFSET 0xC0000000
 // Memory is divided into instruction areas and data areas
 // total memroy space is 1MB, memory map as follows:
-// 0x0000_0000 ~ 0x0007_FFFF --> data areas
-// 0x0008_0000 ~ 0x000B_FFFF --> instruction areas
-// 0x000C_0000 ~ 0x00FF_FFFF --> res data areas
-// over 0x0010_0000 means out of memory area
+// 0x0000_0000 ~ 0x0000_FFFF --> data areas
+// 0x0001_0000 ~ 0x0001_7FFF --> instruction areas
+// 0x0001_8000 ~ 0x0001_FFFF --> res data areas
+// over 0x0001_FFFF means out of memory area
 //
 // DATA_AREA_START_OFFSET means data area start offset, also means max instruction area size
-#define INST_AREA_START_OFFSET 0x00080000
-#define RES_DATA_AREA_START_OFFSET 0x000C0000
+#define INST_AREA_START_OFFSET 0x00010000
+#define RES_DATA_AREA_START_OFFSET 0x00018000
 
-#define REG_WEIGHT_GRANULARITY_OFFSET 0x00
-#define REG_INPUT_GRANULARITY_OFFSET 0x04
-#define REG_MACRO_SEL_OFFSET 0x08
-#define REG_WEIGHT_BASE_ADDR_OFFSET 0x0C
-#define REG_WEIGHT_LENGTH_OFFSET 0x10
-#define REG_CHIP_MODE_OFFSET 0x14
+// #define REG_WEIGHT_GRANULARITY_OFFSET 0x00
+// #define REG_INPUT_GRANULARITY_OFFSET 0x04
+// #define REG_MACRO_SEL_OFFSET 0x08
+// #define REG_WEIGHT_BASE_ADDR_OFFSET 0x0C
+// #define REG_WEIGHT_LENGTH_OFFSET 0x10
+// #define REG_CHIP_MODE_OFFSET 0x14
 
 // *********************************************MRAM Command*********************************************
 
