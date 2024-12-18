@@ -11,6 +11,7 @@
 #define CTRL_DEVICE "/dev/xdma0_user"
 
 #define FIFO_LENGTH 16
+#define BURST_LENGTH 128
 
 // control code
 #define CODE_START 0x1
@@ -46,7 +47,7 @@
 #define REG_ADDR_OFFSET 0x40000000
 #define BRAM_ADDR_OFFSET 0xC0000000
 // Memory is divided into instruction areas and data areas
-// total memroy space is 1MB, memory map as follows:
+// total memroy space is 128KB, memory map as follows:
 // 0x0000_0000 ~ 0x0000_FFFF --> data areas
 // 0x0001_0000 ~ 0x0001_7FFF --> instruction areas
 // 0x0001_8000 ~ 0x0001_FFFF --> res data areas

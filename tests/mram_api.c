@@ -226,8 +226,8 @@ int Ldr(char *device_name, int reg_addr, unsigned int *host_addr)
 
 int ring_ctrl(int start_type, int addr, int len)
 {
-    int burst_len = 128;
-    int i, each_addr, each_len, status;
+    int burst_len = BURST_LENGTH;
+    uint32_t i, each_addr, each_len, status;
     int total_count = len * 4;
     int left_count = len % burst_len == 0 ? len / burst_len : len / burst_len + 1;
     mmap_reg_param mrp;
@@ -240,7 +240,7 @@ int ring_ctrl(int start_type, int addr, int len)
     for (i = 0; i < left_count; i++)
     {
         each_addr = BRAM_ADDR_OFFSET + addr + burst_len * 4 * i;
-        each_len = i == left_count - 1 ? len % burst_len : burst_len;
+        each_len = i == left_count - 1 && len % burst_len !=0 ? len % burst_len : burst_len;
 
 #if DEBUG_MODE == 1
         // write LEN and ADDR regs
@@ -390,6 +390,11 @@ int Store(char *device_name, int device_ram_addr, unsigned int *host_addr, int d
 //************************************************************************************************************* */
 
 //********************************************Host <---> Mcro************************************************** */
+void IAR_inc(uint32_t* iar){
+    int size = *iar % BURST_LENGTH == 0 ? *iar / BURST_LENGTH : *iar / BURST_LENGTH + 1;
+    *iar = *iar + size * BURST_LENGTH >= RES_DATA_AREA_START_OFFSET ? INST_AREA_START_OFFSET : *iar + size * BURST_LENGTH;
+}
+
 int Send(char *device_name, int macro_row, int macro_col, int ip_addr, int mram_addr, unsigned int *host_data_addr, int data_size)
 {
     int i;
@@ -450,7 +455,7 @@ int Send(char *device_name, int macro_row, int macro_col, int ip_addr, int mram_
 
     // ring controller to process cmd
     ring_ctrl(CTRL_REG_START_WRITE, IAR, pos);
-    IAR = IAR + pos * 4 >= RES_DATA_AREA_START_OFFSET ? INST_AREA_START_OFFSET : IAR + pos * 4;
+    IAR_inc(&IAR);
 
 out:
     free(cmd_buffer);
@@ -506,7 +511,7 @@ int Recv(char *send_device_name, char *recv_device_name, int macro_row, int macr
 
     // ring controller to process cmd
     ring_ctrl(CTRL_REG_START_WRITE, IAR, pos);
-    IAR = IAR + pos * 4 >= RES_DATA_AREA_START_OFFSET ? INST_AREA_START_OFFSET : IAR + pos * 4;
+    IAR_inc(&IAR);
 
     // ring controller to read res data
     // The result is 16 bits in a single return, so we need to read it twice
@@ -643,7 +648,7 @@ int Vmmul(char *device_name, char *recv_device_name, unsigned int *input_vector,
 
     // ring controller to process cmd
     ring_ctrl(CTRL_REG_START_WRITE, IAR, pos);
-    IAR = IAR + pos * 4 >= RES_DATA_AREA_START_OFFSET ? INST_AREA_START_OFFSET : IAR + pos * 4;
+    IAR_inc(&IAR);
 
     // ring controller to read res data
     res_data_size = in_group * actived_macro_size * 7;
