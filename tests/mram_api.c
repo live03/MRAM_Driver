@@ -240,7 +240,7 @@ int ring_ctrl(int start_type, int addr, int len)
     for (i = 0; i < left_count; i++)
     {
         each_addr = BRAM_ADDR_OFFSET + addr + burst_len * 4 * i;
-        each_len = i == left_count - 1 && len % burst_len !=0 ? len % burst_len : burst_len;
+        each_len = i == left_count - 1 && len % burst_len != 0 ? len % burst_len : burst_len;
 
 #if DEBUG_MODE == 1
         // write LEN and ADDR regs
@@ -258,11 +258,12 @@ int ring_ctrl(int start_type, int addr, int len)
         *((uint32_t *)(map + CTRL_REG_START_OFFSET)) = htoll(start_type);
 
         // read status
-        do{
+        do
+        {
             status = *((uint32_t *)(map + CTRL_REG_STATUS_OFFSET));
-            if(status == CTRL_REG_STATUS_TIMEOUT)
-                printf("Try to read addr %X timeout!\n",each_addr);
-        }while (status != CTRL_REG_STATUS_SUCCESS && status != CTRL_REG_STATUS_TIMEOUT);
+            if (status == CTRL_REG_STATUS_TIMEOUT)
+                printf("Try to read addr %X timeout!\n", each_addr);
+        } while (status != CTRL_REG_STATUS_SUCCESS && status != CTRL_REG_STATUS_TIMEOUT);
     }
 
     umap_reg(mrp, CTRL_REG_START_OFFSET);
@@ -334,7 +335,7 @@ int Load(char *device_name, int device_ram_addr, unsigned int *host_addr, int da
 }
 
 // Allow data to be stored anywhere in the onboard RAM
- int Store_Everywhere(char *device_name, int device_ram_addr, unsigned int *host_addr, int data_size)
+int Store_Everywhere(char *device_name, int device_ram_addr, unsigned int *host_addr, int data_size)
 {
     int fd;
     ssize_t rc = 0;
@@ -390,7 +391,8 @@ int Store(char *device_name, int device_ram_addr, unsigned int *host_addr, int d
 //************************************************************************************************************* */
 
 //********************************************Host <---> Mcro************************************************** */
-void IAR_inc(uint32_t* iar){
+void IAR_inc(uint32_t *iar)
+{
     int size = *iar % BURST_LENGTH == 0 ? *iar / BURST_LENGTH : *iar / BURST_LENGTH + 1;
     *iar = *iar + size * BURST_LENGTH >= RES_DATA_AREA_START_OFFSET ? INST_AREA_START_OFFSET : *iar + size * BURST_LENGTH;
 }
@@ -662,11 +664,25 @@ int Vmmul(char *device_name, char *recv_device_name, unsigned int *input_vector,
     // recombination the result
 
     // received data
-    // {data1_hi[24:9], {data1_lo[8:0],data2_hi[24:18]}, data2_me[17:2], {data2_lo[1:0], data3_hi[24:11]},
-    // {data3_lo[10:0], data4_hi[24:20]}, data4_me[19:4], {data_lo[3:0], cycle_num[11:0]}}
-
+    /* 
+    data1_hi[24:9], 
+    {data1_lo[8:0],data2_hi[24:18]}, 
+    data2_me[17:2], 
+    {data2_lo[1:0], data3_hi[24:11]},
+     {data3_lo[10:0], data4_hi[24:20]}, 
+     data4_me[19:4], 
+     {data_lo[3:0], cycle_num[11:0]}
+    */
+   
     // target data
     // {data1[24:0], data2[24:0], data3[24:0], data4[24:0], cycle_num[11:0]}
+    for (i = 0; i < res_data_size; i++)
+    {
+        printf("%d ", tmp_res_buffer[i]);
+
+        tmp_res_buffer[i] = tmp_res_buffer[i] & 0x0000FFFF;
+    }
+    printf("\n");
     for (i = 0; i < in_group * actived_macro_size; i++)
     {
         host_data_addr[i * 4] = tmp_res_buffer[i * 7 + 6] << 9 + tmp_res_buffer[i * 7 + 5] >> 7;

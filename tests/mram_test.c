@@ -88,7 +88,7 @@ int init()
     int i;
     uint32_t value;
     uint32_t data[] = {
-        // 0x003C0000,
+        0x003C0000,
         0x003E0000, // 00000000001111100000000000000000 //配置PLL
         0x00029200, // 00000000000000101001001000000000
         0x00100F00, // 00000000000100000000111100000000
@@ -142,8 +142,8 @@ int cap_test()
     int batch_size = 64;
     int *send_data = (int *)malloc(batch_size * sizeof(int));
     int *recv_data = (int *)malloc(batch_size * sizeof(int));
-    int rows = 4, cols = 4, ips = 4, mrams = 1048576;
-    // int rows = 4, cols = 4,ips = 4, mrams = 4096;
+    // int rows = 4, cols = 4, ips = 4, mrams = 1048576;
+    int rows = 4, cols = 4,ips = 4, mrams = 4096;
     // int rows = 1, cols = 1, ips = 1, mrams = 4096;
     FILE *fd = fopen("cap_test_64_128_64M.log", "w");
     getTime();
@@ -154,13 +154,14 @@ int cap_test()
                 for (mram_addr = 0; mram_addr < mrams; mram_addr += batch_size)
                 {
                     start = macro_row * (cols * ips * mrams) + macro_col * (ips * mrams) + ip_addr * mrams + mram_addr;
-                    for (i = 0; i < batch_size; i++)
-                        send_data[i] = start + i;
-                    // printf("Write Start!\n");
+                    for (i = 0; i < batch_size; i++){
+                        send_data[i] = rand() % 0xFFFFFFFF;
+                        // send_data[i] = start + i;
+
+                    }
                     err = Send(H2C_DEVICE, macro_row, macro_col, ip_addr, mram_addr, send_data, batch_size);
                     if (err != 0)
                         printf("error1!\n");
-                    // printf("Read Start!\n");
                     err = Recv(H2C_DEVICE, C2H_DEVICE, macro_row, macro_col, ip_addr, mram_addr, recv_data, batch_size);
 
                     if (err != 0)
@@ -782,6 +783,10 @@ int calc_test()
     Load_Everywhere(C2H_DEVICE, RES_DATA_AREA_START_OFFSET, res, 7);
     print_buf(res, 32, 7);
 
+
+    for(i = 0;i<7;i++){
+        res[i] = 0x0000FFFF & res[i];
+    }
     host_data_addr[0] = res[6] << 9 + res[5] >> 7;
     host_data_addr[1] = (res[5] & 0x3F) << 18 + res[4] << 2 + res[3] >> 14;
     host_data_addr[2] = (res[3] & 0x3FF) << 11 + res[2] >> 5;
@@ -799,14 +804,13 @@ int main(int argc, char const *argv[])
 
     init();
     // test_mram();
-    calc_test();
+    // calc_test();
     // test_mram();
 
-    // cap_test();
+    cap_test();
 
-    // ring_ctrl(CTRL_REG_START_READ, 0x1C, 2);
-    // Load_Everywhere(C2H_DEVICE,0x1C,data,2);
+    // ring_ctrl(CTRL_REG_START_READ, 0x1C, 1);
+    // Load_Everywhere(C2H_DEVICE,0x1C,data,1);
     // print_buf(data,32,2);
-    // getTime(buf);
     return 0;
 }
