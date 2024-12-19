@@ -34,8 +34,8 @@ void print_buf(void *buf, int radix, int size)
     {
         buf32 = (uint32_t *)buf;
         for (i = 0; i < size; i++)
-        // printf("%d ", buf32[pos++]);
-        printf("0x%08X ", buf32[pos++]);
+            // printf("%d ", buf32[pos++]);
+            printf("0x%08X ", buf32[pos++]);
     }
     printf("\n");
 }
@@ -45,40 +45,39 @@ void test_mram()
     uint32_t reg_buf;
     char char_buffer[128] = {0};
     int batch_size = 1;
-    uint32_t *u32_buffer;
-    uint32_t *u32_buffer2;
+    int32_t *i32_buffer;
+    int32_t *i32_buffer2;
     int pos = 0;
     int fd, i, j;
-    int cmd_size = sizeof(Controll_Command);
 
-    u32_buffer = (uint32_t *)malloc(batch_size * sizeof(uint32_t));
-    u32_buffer2 = (uint32_t *)malloc(batch_size * sizeof(uint32_t));
+    i32_buffer = (int32_t *)malloc(batch_size * sizeof(int32_t));
+    i32_buffer2 = (int32_t *)malloc(batch_size * sizeof(int32_t));
     // printf("\n--------------------------------reg function test--------------------------------\n");
     // Sldi(CTRL_DEVICE, 0x00215555, 0);
     // Sld(CTRL_DEVICE, 0, 2);
-    // printf("%X\n", u32_buffer);
-    // Ldr(CTRL_DEVICE, 2, u32_buffer);
-    // printf("%X\n", u32_buffer);
+    // printf("%X\n", i32_buffer);
+    // Ldr(CTRL_DEVICE, 2, i32_buffer);
+    // printf("%X\n", i32_buffer);
 
     // printf("\n--------------------------------RAM function test--------------------------------\n");
-    // Store(H2C_DEVICE, 0x0000, u32_buffer, 4);
+    // Store(H2C_DEVICE, 0x0000, i32_buffer, 4);
     // printf("write success\n");
-    // print_buf(u32_buffer,32,4);
-    // Load(C2H_DEVICE, 0x0000, u32_buffer2, 4);
+    // print_buf(i32_buffer,32,4);
+    // Load(C2H_DEVICE, 0x0000, i32_buffer2, 4);
     // printf("read success\n");
-    // print_buf(u32_buffer2,32,4);
+    // print_buf(i32_buffer2,32,4);
 
     printf("\n--------------------------------Macro function test--------------------------------\n");
     for (i = 0; i < batch_size; i++)
-        u32_buffer[i] = 0x12;
-    Send(H2C_DEVICE, 0, 0, 0, 0X00, u32_buffer, batch_size);
-    // print_buf(u32_buffer, 32, 4);
+        i32_buffer[i] = i;
+    Send(0, 0, 0, 0, i32_buffer, batch_size);
+    // print_buf(i32_buffer, 32, 4);
 
-    // Load_Everywhere(C2H_DEVICE, INST_AREA_START_OFFSET, u32_buffer2, 4);
+    // Load_Everywhere(C2H_DEVICE, INST_AREA_START_OFFSET, i32_buffer2, 4);
 
     printf("---------Read Out------------\n");
-    Recv(H2C_DEVICE, C2H_DEVICE, 0, 0, 0, 0, u32_buffer2, batch_size);
-    print_buf(u32_buffer2, 32, batch_size);
+    Recv(0, 0, 0, 0, i32_buffer2, batch_size);
+    print_buf(i32_buffer2, 32, batch_size);
 
     // printf("\n--------------------------------Calc function test--------------------------------\n");
 }
@@ -157,11 +156,11 @@ int cap_test()
                     for (i = 0; i < batch_size; i++)
                         send_data[i] = start + i;
                     // printf("Write Start!\n");
-                    err = Send(H2C_DEVICE, macro_row, macro_col, ip_addr, mram_addr, send_data, batch_size);
+                    err = Send(macro_row, macro_col, ip_addr, mram_addr, send_data, batch_size);
                     if (err != 0)
                         printf("error1!\n");
                     // printf("Read Start!\n");
-                    err = Recv(H2C_DEVICE, C2H_DEVICE, macro_row, macro_col, ip_addr, mram_addr, recv_data, batch_size);
+                    err = Recv(macro_row, macro_col, ip_addr, mram_addr, recv_data, batch_size);
 
                     if (err != 0)
                         printf("error2!\n");
@@ -787,7 +786,6 @@ int calc_test()
     host_data_addr[2] = (res[3] & 0x3FF) << 11 + res[2] >> 5;
     host_data_addr[3] = (res[2] & 0x1F) << 20 + res[1] << 4 + res[0] >> 12;
     print_buf(host_data_addr, 32, 4);
-
 }
 
 int main(int argc, char const *argv[])
