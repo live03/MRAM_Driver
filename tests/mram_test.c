@@ -173,12 +173,6 @@ int cap_test()
     getTime();
 }
 
-int sendCMD(void *value)
-{
-    Store_Everywhere(H2C_DEVICE, 0, (int *)value, 1);
-    ring_ctrl(CTRL_REG_START_WRITE, 0, 1);
-}
-
 int calc_test()
 {
     int i, value;
