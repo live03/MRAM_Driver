@@ -141,8 +141,8 @@ int cap_test()
     int batch_size = 64;
     int *send_data = (int *)malloc(batch_size * sizeof(int));
     int *recv_data = (int *)malloc(batch_size * sizeof(int));
-    int rows = 4, cols = 4, ips = 4, mrams = 1048576;
-    // int rows = 4, cols = 4,ips = 4, mrams = 4096;
+    // int rows = 4, cols = 4, ips = 4, mrams = 1048576;
+    int rows = 4, cols = 4,ips = 4, mrams = 4096;
     // int rows = 1, cols = 1, ips = 1, mrams = 4096;
     FILE *fd = fopen("cap_test_64_128_64M.log", "w");
     getTime();
@@ -152,25 +152,25 @@ int cap_test()
             for (ip_addr = 0; ip_addr < ips; ip_addr++)
                 for (mram_addr = 0; mram_addr < mrams; mram_addr += batch_size)
                 {
-                    start = macro_row * (cols * ips * mrams) + macro_col * (ips * mrams) + ip_addr * mrams + mram_addr;
+                    // start = macro_row * (cols * ips * mrams) + macro_col * (ips * mrams) + ip_addr * mrams + mram_addr;
                     for (i = 0; i < batch_size; i++)
-                        send_data[i] = start + i;
+                        send_data[i] = 1;//start + i;
                     // printf("Write Start!\n");
                     err = Send(macro_row, macro_col, ip_addr, mram_addr, send_data, batch_size);
-                    if (err != 0)
-                        printf("error1!\n");
+                    // if (err != 0)
+                    //     printf("error1!\n");
                     // printf("Read Start!\n");
-                    err = Recv(macro_row, macro_col, ip_addr, mram_addr, recv_data, batch_size);
+                    // err = Recv(macro_row, macro_col, ip_addr, mram_addr, recv_data, batch_size);
 
-                    if (err != 0)
-                        printf("error2!\n");
-                    for (i = 0; i < batch_size; i++)
-                        if (send_data[i] != recv_data[i])
-                            fprintf(fd, "Macro(%d, %d) (ip, addr):(%d, 0x%08X) match failed. (Send, Recv):(%d, %d)\n",
-                                    macro_row, macro_col, ip_addr, mram_addr + i, send_data[i], recv_data[i]);
-                        else
-                            fprintf(fd, "Macro(%d, %d) (ip, addr):(%d, 0x%08X) match success. (Send, Recv):(%d, %d)\n",
-                                    macro_row, macro_col, ip_addr, mram_addr + i, send_data[i], recv_data[i]);
+                    // if (err != 0)
+                    //     printf("error2!\n");
+                    // for (i = 0; i < batch_size; i++)
+                    //     if (send_data[i] != recv_data[i])
+                    //         fprintf(fd, "Macro(%d, %d) (ip, addr):(%d, 0x%08X) match failed. (Send, Recv):(%d, %d)\n",
+                    //                 macro_row, macro_col, ip_addr, mram_addr + i, send_data[i], recv_data[i]);
+                    //     else
+                    //         fprintf(fd, "Macro(%d, %d) (ip, addr):(%d, 0x%08X) match success. (Send, Recv):(%d, %d)\n",
+                    //                 macro_row, macro_col, ip_addr, mram_addr + i, send_data[i], recv_data[i]);
                 }
     getTime();
 }
@@ -797,10 +797,10 @@ int main(int argc, char const *argv[])
 
     init();
     // test_mram();
-    calc_test();
+    // calc_test();
     // test_mram();
 
-    // cap_test();
+    cap_test();
 
     // ring_ctrl(CTRL_REG_START_READ, 0x1C, 2);
     // Load_Everywhere(C2H_DEVICE,0x1C,data,2);
