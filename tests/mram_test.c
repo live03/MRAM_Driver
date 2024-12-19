@@ -155,22 +155,20 @@ int cap_test()
                     // start = macro_row * (cols * ips * mrams) + macro_col * (ips * mrams) + ip_addr * mrams + mram_addr;
                     for (i = 0; i < batch_size; i++)
                         send_data[i] = 1;//start + i;
-                    // printf("Write Start!\n");
                     err = Send(macro_row, macro_col, ip_addr, mram_addr, send_data, batch_size);
-                    // if (err != 0)
-                    //     printf("error1!\n");
-                    // printf("Read Start!\n");
-                    // err = Recv(macro_row, macro_col, ip_addr, mram_addr, recv_data, batch_size);
+                    if (err != 0)
+                        printf("error1!\n");
+                    err = Recv(macro_row, macro_col, ip_addr, mram_addr, recv_data, batch_size);
 
-                    // if (err != 0)
-                    //     printf("error2!\n");
-                    // for (i = 0; i < batch_size; i++)
-                    //     if (send_data[i] != recv_data[i])
-                    //         fprintf(fd, "Macro(%d, %d) (ip, addr):(%d, 0x%08X) match failed. (Send, Recv):(%d, %d)\n",
-                    //                 macro_row, macro_col, ip_addr, mram_addr + i, send_data[i], recv_data[i]);
-                    //     else
-                    //         fprintf(fd, "Macro(%d, %d) (ip, addr):(%d, 0x%08X) match success. (Send, Recv):(%d, %d)\n",
-                    //                 macro_row, macro_col, ip_addr, mram_addr + i, send_data[i], recv_data[i]);
+                    if (err != 0)
+                        printf("error2!\n");
+                    for (i = 0; i < batch_size; i++)
+                        if (send_data[i] != recv_data[i])
+                            fprintf(fd, "Macro(%d, %d) (ip, addr):(%d, 0x%08X) match failed. (Send, Recv):(%d, %d)\n",
+                                    macro_row, macro_col, ip_addr, mram_addr + i, send_data[i], recv_data[i]);
+                        else
+                            fprintf(fd, "Macro(%d, %d) (ip, addr):(%d, 0x%08X) match success. (Send, Recv):(%d, %d)\n",
+                                    macro_row, macro_col, ip_addr, mram_addr + i, send_data[i], recv_data[i]);
                 }
     getTime();
 }
