@@ -42,37 +42,37 @@ fi
 echo -n "Loading driver..."
 case $interrupt_selection in
 	"0")
-		echo "insmod xdma.ko interrupt_mode=1 ..."
-		ret=`insmod ../xdma/xdma.ko interrupt_mode=0`
+		echo "modprobe xdma.ko interrupt_mode=1 ..."
+		ret=`modprobe ../xdma/xdma.ko interrupt_mode=0`
 		;;
 	"1")
-		echo "insmod xdma.ko interrupt_mode=2 ..."
-		ret=`insmod ../xdma/xdma.ko interrupt_mode=1`
+		echo "modprobe xdma.ko interrupt_mode=2 ..."
+		ret=`modprobe ../xdma/xdma.ko interrupt_mode=1`
 		;;
 	"2")
-		echo "insmod xdma.ko interrupt_mode=3 ..."
-		ret=`insmod ../xdma/xdma.ko interrupt_mode=2`
+		echo "modprobe xdma.ko interrupt_mode=3 ..."
+		ret=`modprobe ../xdma/xdma.ko interrupt_mode=2`
 		;;
 	"3")
-		echo "insmod xdma.ko interrupt_mode=4 ..."
-		ret=`insmod ../xdma/xdma.ko interrupt_mode=3`
+		echo "modprobe xdma.ko interrupt_mode=4 ..."
+		ret=`modprobe ../xdma/xdma.ko interrupt_mode=3`
 		;;
 	"4")
-		echo "insmod xdma.ko poll_mode=1 ..."
-		ret=`insmod ../xdma/xdma.ko poll_mode=1`
+		echo "modprobe xdma.ko poll_mode=1 ..."
+		ret=`modprobe ../xdma/xdma.ko poll_mode=1`
 		;;
 	*)
 		intp=`sudo lspci -d :${device_id} -v | grep -o -E "MSI-X"`
 		intp1=`sudo lspci -d :${device_id} -v | grep -o -E "MSI:"`
-	       	if [[ ( -n $intp ) && ( $intp == "MSI-X" ) ]]; then
-			echo "insmod xdma.ko interrupt_mode=0 ..."
-			ret=`insmod ../xdma/xdma.ko interrupt_mode=0`
+		if [[ ( -n $intp ) && ( $intp == "MSI-X" ) ]]; then
+			echo "modprobe xdma.ko interrupt_mode=0 ..."
+			ret=`modprobe ../xdma/xdma.ko interrupt_mode=0`
 	       	elif [[ ( -n $intp1 ) && ( $intp1 == "MSI:" ) ]]; then
-			echo "insmod xdma.ko interrupt_mode=1 ..."
-			ret=`insmod ../xdma/xdma.ko interrupt_mode=1`
+			echo "modprobe xdma.ko interrupt_mode=1 ..."
+			ret=`modprobe ../xdma/xdma.ko interrupt_mode=1`
 		else
-			echo "insmod xdma.ko interrupt_mode=2 ..."
-			ret=`insmod ../xdma/xdma.ko interrupt_mode=2`
+			echo "modprobe xdma.ko interrupt_mode=2 ..."
+			ret=`modprobe ../xdma/xdma.ko interrupt_mode=2`
 		fi
 		;;
 esac
