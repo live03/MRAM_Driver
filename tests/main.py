@@ -355,7 +355,7 @@ def data_gen():
             else:
                 fp.write(trans_word.format(calc_fmt_instr))
                 fp.write(trans_lat)
-
+            
             for mr in range(macro_row):
                 for ig in range(in_group):
                     for ib in range(inbits):

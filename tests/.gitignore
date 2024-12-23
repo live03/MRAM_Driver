@@ -1,0 +1,5 @@
+gdb
+*.log
+*.bin
+*.txt
+load_driver.sh
