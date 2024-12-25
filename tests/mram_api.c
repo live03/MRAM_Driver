@@ -41,7 +41,7 @@ End_Command CTRL_RESET_CMD = {0, 0x18};
 // global Instruction Address Register
 uint32_t IAR = INST_AREA_START_OFFSET;
 
-//****************************************print message******************************************************** */
+//****************************************MISC******************************************************** */
 
 void print_cmd(Controll_Command cmd)
 {
@@ -52,7 +52,7 @@ void print_cmd(Controll_Command cmd)
     {
     case CODE_START:
         printf("Start Command 0x%X = {MODE:%s, SEL:%s macro, CS:(%d)(row %d, col %d)}\n",
-               cmd.start, mode[cmd.start.MODE], sel[cmd.start.SEL], cmd.start.CS, cmd.start.CS >> 2, cmd.start.CS && 3);
+               cmd.start, mode[cmd.start.MODE], sel[cmd.start.SEL], cmd.start.CS, cmd.start.CS >> 2, cmd.start.CS & 0x03);
         break;
     case CODE_CALC:
         printf("Calculate Command 0x%X = {wbits:%d, inbits:%d, in_group:%d}\n",
@@ -227,7 +227,8 @@ int Ldr(char *device_name, int reg_addr, unsigned int *host_addr)
 int ring_ctrl(int start_type, int addr, int len)
 {
     int burst_len = BURST_LENGTH;
-    uint32_t i, each_addr, each_len, status;
+    int i;
+    uint32_t each_addr, each_len, status;
     int total_count = len * 4;
     int left_count = len % burst_len == 0 ? len / burst_len : len / burst_len + 1;
     mmap_reg_param mrp;
@@ -274,15 +275,31 @@ int ring_ctrl(int start_type, int addr, int len)
 
 //****************************************RAM <---> Macro****************************************************** */
 
-int Vread(char *device_name, int macro_row, int macro_col, int ip_addr, int mram_addr, int data_size);
+int Vread(char *device_name, int macro_row, int macro_col, int ip_addr, int mram_addr, unsigned int device_ram_addr, int data_size)
+{
+    int err1 = 0, err2 = 0;
+    int32_t *tmp_buffer = (int32_t *)malloc(data_size * sizeof(int32_t));
+    err1 = Recv(H2C_DEVICE, C2H_DEVICE, macro_row, macro_col, ip_addr, mram_addr, tmp_buffer, data_size);
+    err2 = Store(H2C_DEVICE, device_ram_addr, tmp_buffer, data_size);
+    free(tmp_buffer);
+    return err1 | err2;
+}
 
-int Vwrite(char *device_name, int macro_row, int macro_col, int ip_addr, int mram_addr, int data_size);
+int Vwrite(char *device_name, int macro_row, int macro_col, int ip_addr, int mram_addr, unsigned int device_ram_addr, int data_size)
+{
+    int err1 = 0, err2 = 0;
+    int32_t *tmp_buffer = (int32_t *)malloc(data_size * sizeof(int32_t));
+    err1 = Load(C2H_DEVICE, device_ram_addr, tmp_buffer, data_size);
+    err2 = Send(H2C_DEVICE, macro_row, macro_col, ip_addr, mram_addr, tmp_buffer, data_size);
+    free(tmp_buffer);
+    return err1 | err2;
+}
 
 //************************************************************************************************************* */
 
 //****************************************Host <---> Device RAM************************************************ */
 // Allow data to be stored anywhere in the onboard RAM
-int Load_Everywhere(char *device_name, int device_ram_addr, unsigned int *host_addr, int data_size)
+int Load_Everywhere(char *device_name, int device_ram_addr, int *host_addr, int data_size)
 {
     int fd;
     ssize_t rc = 0;
@@ -318,7 +335,7 @@ out:
 }
 
 // only allow data to be stored in the data area in the onboard RAM
-int Load(char *device_name, int device_ram_addr, unsigned int *host_addr, int data_size)
+int Load(char *device_name, int device_ram_addr, int *host_addr, int data_size)
 {
     if (device_ram_addr % 4 != 0)
     {
@@ -334,7 +351,7 @@ int Load(char *device_name, int device_ram_addr, unsigned int *host_addr, int da
 }
 
 // Allow data to be stored anywhere in the onboard RAM
-int Store_Everywhere(char *device_name, int device_ram_addr, unsigned int *host_addr, int data_size)
+int Store_Everywhere(char *device_name, int device_ram_addr, int *host_addr, int data_size)
 {
     int fd;
     ssize_t rc = 0;
@@ -373,7 +390,7 @@ out:
 }
 
 // only allow data to be stored in the data area in the onboard RAM
-int Store(char *device_name, int device_ram_addr, unsigned int *host_addr, int data_size)
+int Store(char *device_name, int device_ram_addr, int *host_addr, int data_size)
 {
     if (device_ram_addr % 4 != 0)
     {
@@ -396,11 +413,11 @@ void IAR_inc(uint32_t *iar)
     *iar = *iar + size * BURST_LENGTH >= RES_DATA_AREA_START_OFFSET ? INST_AREA_START_OFFSET : *iar + size * BURST_LENGTH;
 }
 
-int Send(char *device_name, int macro_row, int macro_col, int ip_addr, int mram_addr, unsigned int *host_data_addr, int data_size)
+int Send(char *device_name, int macro_row, int macro_col, int ip_addr, int mram_addr, int *host_data_addr, int data_size)
 {
     int i;
     ssize_t rc = 0;
-    unsigned int *cmd_buffer = NULL;
+    uint32_t *cmd_buffer = NULL;
     int pos = 0;
     int cmd_size = sizeof(Controll_Command);
     // avoid platform difference
@@ -463,12 +480,12 @@ out:
     return rc;
 }
 
-int Recv(char *send_device_name, char *recv_device_name, int macro_row, int macro_col, int ip_addr, int mram_addr, unsigned int *host_data_addr, int data_size)
+int Recv(char *send_device_name, char *recv_device_name, int macro_row, int macro_col, int ip_addr, int mram_addr, int *host_data_addr, int data_size)
 {
     int i, fd;
     ssize_t rc = 0;
-    unsigned int *cmd_buffer = NULL;
-    unsigned int *tmp_res_buffer = NULL;
+    uint32_t *cmd_buffer = NULL;
+    uint32_t *raw_res_buffer = NULL;
     int pos = 0;
     int cmd_size = sizeof(Controll_Command);
 
@@ -519,13 +536,13 @@ int Recv(char *send_device_name, char *recv_device_name, int macro_row, int macr
     ring_ctrl(CTRL_REG_START_READ, RES_DATA_AREA_START_OFFSET, data_size * 2);
 
     // wait to recv data
-    tmp_res_buffer = (unsigned int *)malloc(data_size * 2 * sizeof(uint32_t));
+    raw_res_buffer = (uint32_t *)malloc(data_size * 2 * sizeof(uint32_t));
 
     fd = open(recv_device_name, O_RDWR);
-    rc = read_to_buffer(recv_device_name, fd, (char *)tmp_res_buffer, data_size * 2 * 4, RES_DATA_AREA_START_OFFSET);
+    rc = read_to_buffer(recv_device_name, fd, (char *)raw_res_buffer, data_size * 2 * 4, RES_DATA_AREA_START_OFFSET);
     // recombination the result
     for (i = 0; i < data_size; i++)
-        host_data_addr[i] = tmp_res_buffer[i * 2 + 1] + (tmp_res_buffer[i * 2] << 16);
+        host_data_addr[i] = raw_res_buffer[i * 2 + 1] + (raw_res_buffer[i * 2] << 16);
 
 out:
     free(cmd_buffer);
@@ -536,15 +553,16 @@ out:
 
 //************************************************Calculate**************************************************** */
 
-int Vmmul(char *device_name, char *recv_device_name, unsigned int *input_vector, int input_size, int inbits, int in_group, int macro_row, int macro_col, int mram_addr, int wbits, int *host_data_addr)
+int Vmmul(char *device_name, char *recv_device_name, int *input_vector, int input_size, int inbits, int in_group, int macro_row, int macro_col, int mram_addr, int wbits, int *host_data_addr)
 {
     int fd, i, j, mr, mc, ig, ib, idx, wb, res_data_size;
     int ind;
     ssize_t rc = 0;
     uint32_t *cmd_buffer = NULL;
-    int32_t *tmp_res_buffer = NULL;
+    uint32_t *raw_res_buffer = NULL;
     int pos = 0;
-    int actived_macro_size = macro_row == 4 ? 16 : macro_col == 4 ? 4 : 1;
+    int actived_macro_size = macro_row == 4 ? 16 : macro_col == 4 ? 4
+                                                                  : 1;
     int actived_macro_row_num = macro_row == 4 ? 4 : 1;
     int actived_macro_col_num = macro_col == 4 ? 4 : 1;
     int cmd_size = sizeof(Controll_Command);
@@ -570,7 +588,7 @@ int Vmmul(char *device_name, char *recv_device_name, unsigned int *input_vector,
     {
     case 16:
         START_CMD.SEL = START_SEL_ALL;
-        START_CMD.CS = 0;
+        START_CMD.CS = 0xF;
         break;
     case 4:
         START_CMD.SEL = START_SEL_ROW;
@@ -631,25 +649,22 @@ int Vmmul(char *device_name, char *recv_device_name, unsigned int *input_vector,
     }
 
     // transfer weight matrix address
-    for (mr = 0; mr < actived_macro_row_num; mr++)
+    for (wb = 0; wb < wbits; wb++)
     {
-        for (mc = 0; mc < actived_macro_col_num; mc++)
+        for (mr = 0; mr < actived_macro_row_num; mr++)
         {
-            // for (ig = 0; ig < in_group; ig++)
-            // {
-                for (wb = 0; wb < wbits; wb++)
+            for (mc = 0; mc < actived_macro_col_num; mc++)
+            {
+                // A single address retrieves 32 bits of data, so just need 16 addresses
+                for (idx = 0; idx < 16; idx++)
                 {
-                    // A single address retrieves 32 bits of data, so just need 16 addresses
-                    for (idx = 0; idx < 16; idx++)
-                    {   
-                        ADDR_CMD.ip = 0;
-                        // weight matrix must be written sequentially
-                        ADDR_CMD.addr = mram_addr + wb * 16 + idx;
-                        cmd_buffer[pos++] = *(uint32_t *)&ADDR_CMD;
-                        print_cmd((Controll_Command)ADDR_CMD);
-                    }
+                    ADDR_CMD.ip = 0;
+                    // weight matrix must be written sequentially
+                    ADDR_CMD.addr = mram_addr + wb * 16 + idx;
+                    cmd_buffer[pos++] = *(uint32_t *)&ADDR_CMD;
+                    print_cmd((Controll_Command)ADDR_CMD);
                 }
-            // }
+            }
         }
     }
 
@@ -671,16 +686,15 @@ int Vmmul(char *device_name, char *recv_device_name, unsigned int *input_vector,
     ring_ctrl(CTRL_REG_START_READ, RES_DATA_AREA_START_OFFSET, res_data_size);
 
     // wait to recv data
-    tmp_res_buffer = (unsigned int *)malloc(res_data_size * sizeof(uint32_t));
+    raw_res_buffer = (uint32_t *)malloc(res_data_size * sizeof(uint32_t));
 
     fd = open(recv_device_name, O_RDWR);
-    rc = read_to_buffer(recv_device_name, fd, (char *)tmp_res_buffer, res_data_size * 4, RES_DATA_AREA_START_OFFSET);
-
+    rc = read_to_buffer(recv_device_name, fd, (char *)raw_res_buffer, res_data_size * 4, RES_DATA_AREA_START_OFFSET);
 
     printf("received raw data:");
     for (i = 0; i < res_data_size; i++)
     {
-        printf("%d ", tmp_res_buffer[i]);
+        printf("%d ", raw_res_buffer[i]);
     }
     printf("\n");
 
@@ -700,10 +714,10 @@ int Vmmul(char *device_name, char *recv_device_name, unsigned int *input_vector,
     // {data1[24:0], data2[24:0], data3[24:0], data4[24:0], cycle_num[11:0]}
     for (i = 0; i < in_group * actived_macro_size; i++)
     {
-        host_data_addr[i * 4] = (tmp_res_buffer[i * 7 + 6] << 9) + (tmp_res_buffer[i * 7 + 5] >> 7);
-        host_data_addr[i * 4 + 1] = ((tmp_res_buffer[i * 7 + 5] & 0x7F) << 18) + (tmp_res_buffer[i * 7 + 4] << 2) + (tmp_res_buffer[i * 7 + 3] >> 14);
-        host_data_addr[i * 4 + 2] = ((tmp_res_buffer[i * 7 + 3] & 0x3FFF) << 11) + (tmp_res_buffer[i * 7 + 2] >> 5);
-        host_data_addr[i * 4 + 3] = ((tmp_res_buffer[i * 7 + 2] & 0x1F) << 20) + (tmp_res_buffer[i * 7 + 1] << 4) + (tmp_res_buffer[i * 7] >> 12);
+        host_data_addr[i * 4] = (raw_res_buffer[i * 7 + 6] << 9) + (raw_res_buffer[i * 7 + 5] >> 7);
+        host_data_addr[i * 4 + 1] = ((raw_res_buffer[i * 7 + 5] & 0x7F) << 18) + (raw_res_buffer[i * 7 + 4] << 2) + (raw_res_buffer[i * 7 + 3] >> 14);
+        host_data_addr[i * 4 + 2] = ((raw_res_buffer[i * 7 + 3] & 0x3FFF) << 11) + (raw_res_buffer[i * 7 + 2] >> 5);
+        host_data_addr[i * 4 + 3] = ((raw_res_buffer[i * 7 + 2] & 0x1F) << 20) + (raw_res_buffer[i * 7 + 1] << 4) + (raw_res_buffer[i * 7] >> 12);
     }
 out:
     free(cmd_buffer);
@@ -712,7 +726,7 @@ out:
 
 int Vvdmu(char *device_name, int ram_vector_addr, int ram_vector_size, int inbits, int in_group, int macro_row, int macro_col, int mram_addr, int wbits, int device_ram_addr);
 
-int Vvadd(char *device_name, unsigned int *input_vector, int input_size, int ram_vector_addr, int device_ram_addr);
+int Vvadd(char *device_name, int *input_vector, int input_size, int ram_vector_addr, int device_ram_addr);
 
 //************************************************************************************************************* */
 
@@ -726,6 +740,43 @@ int Wait(int macro_row, int macro_col)
 int Wakeup(int macro_row, int macro_col)
 {
     printf("Macro(%d, %d) is Unlocked", macro_row, macro_col);
+}
+
+int Init()
+{
+    int i;
+    int32_t value;
+    int32_t data[] = {
+        0x003C0000, // reset PLL
+        0x003E0000, // 00000000001111100000000000000000 //配置PLL
+        0x00029200, // 00000000000000101001001000000000
+        0x00100F00, // 00000000000100000000111100000000
+        0x000840CE, // 00000000000010000100000011001110
+        0x000840CC, // 00000000000010000100000011001100
+        0x00100F0F, // 00000000000100000000111100001111
+        0x000840CE, // 00000000000010000100000011001110
+        0x000840FE, // 00000000000010000100000011001110
+        0x00215555, // 00000000001000010101010101010101
+        // 0x00025200, // 00000000000000100101001000000000
+        // 0x00100F00, // 00000000000100000000111100000000
+        // 0x00100F0F, // 00000000000100000000111100001111
+        // 0x00215555  // 00000000001000010101010101010101
+
+    };
+    for (i = 0; i < sizeof(data) / sizeof(data[0]); i++)
+    {
+        value = data[i];
+        Store_Everywhere(H2C_DEVICE, INST_AREA_START_OFFSET, &value, 1);
+        ring_ctrl(CTRL_REG_START_WRITE, INST_AREA_START_OFFSET, 1);
+    }
+    sleep(1);
+
+    value = 0X00380000;
+    Store_Everywhere(H2C_DEVICE, INST_AREA_START_OFFSET, &value, 1);
+    ring_ctrl(CTRL_REG_START_WRITE, INST_AREA_START_OFFSET, 1);
+    sleep(1);
+
+    return 0;
 }
 
 //************************************************************************************************************* */

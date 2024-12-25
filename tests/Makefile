@@ -16,4 +16,4 @@ lib$(name).so: mram_api.c dma_utils.c
 	$(CC) -fPIC -shared $^ -o $@ $(CFLAGS)
 
 clean:
-	rm -rf *.o *.bin *.log mram_test libmram_api.so
+	rm -rf *.o *.bin *.log *.txt mram_test libmram_api.so
