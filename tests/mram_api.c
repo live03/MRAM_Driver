@@ -89,38 +89,38 @@ typedef struct mmap_reg_param_t
 /**
  * @brief
  *
- * @param device_name
  * @param reg_addr
  * @return mmap_reg_param
  */
-mmap_reg_param map_reg(char *device_name, int reg_addr)
+mmap_reg_param map_reg(int reg_addr)
 {
     int fd;
     off_t target = reg_addr;
-    off_t target_aligned, offset;
+    off_t target_aligned;
+    // off_t offset;
     void *map;
     mmap_reg_param res = {0, 0, 0};
 
     // check for target page alignment
     // usually, page size is 4k
     // get an in-page offset of the address
-    offset = target & (PAGE_SIZE - 1);
+    // offset = target & (PAGE_SIZE - 1);
     // If the address exceeds the page size, get the number of pages include
     target_aligned = target & (~(PAGE_SIZE - 1));
 #if DEBUG_MODE == 1
     printf("device: %s,base address:0x%lx, map range: 0x%lx ~ 0x%lx, access %s.\n",
-           device_name, target, target_aligned, target_aligned + PAGE_SIZE, "read/write");
+           CTRL_DEVICE, target, target_aligned, target_aligned + PAGE_SIZE, "read/write");
 #endif
     // open xdma device
-    if ((fd = open(device_name, O_RDWR | O_SYNC)) == -1)
+    if ((fd = open(CTRL_DEVICE, O_RDWR | O_SYNC)) == -1)
     {
         fprintf(stderr, "character device %s opened failed: %s.\n",
-                device_name, strerror(errno));
+                CTRL_DEVICE, strerror(errno));
         res.err = errno;
         return res;
     }
 #if DEBUG_MODE == 1
-    printf("character device %s opened.\n", device_name);
+    printf("character device %s opened.\n", CTRL_DEVICE);
 #endif
 
     // only map to the specified address and the last four bytes
@@ -149,7 +149,7 @@ int umap_reg(mmap_reg_param mrp, int reg_addr)
 {
     if (munmap(mrp.map, PAGE_SIZE) == -1)
     {
-        fprintf(stderr, "Memory 0x%lx mapped failed: %s.\n",
+        fprintf(stderr, "Memory 0x%X mapped failed: %s.\n",
                 reg_addr, strerror(errno));
         return 1;
     }
@@ -157,11 +157,11 @@ int umap_reg(mmap_reg_param mrp, int reg_addr)
     return 0;
 }
 
-int Sldi(char *device_name, unsigned int imm, int reg_addr)
+int Sldi(unsigned int imm, int reg_addr)
 {
     void *map;
 
-    mmap_reg_param mrp = map_reg(device_name, reg_addr);
+    mmap_reg_param mrp = map_reg(reg_addr);
     if (mrp.err)
         return 1;
     map = mrp.map;
@@ -176,7 +176,7 @@ int Sldi(char *device_name, unsigned int imm, int reg_addr)
     return umap_reg(mrp, reg_addr);
 }
 
-int Sld(char *device_name, int reg_addr_from, int reg_addr_to)
+int Sld(int reg_addr_from, int reg_addr_to)
 {
     int err;
     void *map_from, *map_to;
@@ -186,8 +186,8 @@ int Sld(char *device_name, int reg_addr_from, int reg_addr_to)
     target_aligned_from = reg_addr_from & (~(PAGE_SIZE - 1));
     target_aligned_to = reg_addr_to & (~(PAGE_SIZE - 1));
 
-    mrp_from = map_reg(device_name, reg_addr_from);
-    mrp_to = target_aligned_from == target_aligned_to ? mrp_from : map_reg(device_name, reg_addr_to);
+    mrp_from = map_reg(reg_addr_from);
+    mrp_to = target_aligned_from == target_aligned_to ? mrp_from : map_reg(reg_addr_to);
     if (mrp_from.err || mrp_to.err)
         return 1;
 
@@ -206,11 +206,11 @@ int Sld(char *device_name, int reg_addr_from, int reg_addr_to)
     return err;
 }
 
-int Ldr(char *device_name, int reg_addr, unsigned int *host_addr)
+int Ldr(int reg_addr, unsigned int *host_addr)
 {
     void *map;
 
-    mmap_reg_param mrp = map_reg(device_name, reg_addr);
+    mmap_reg_param mrp = map_reg(reg_addr);
     if (mrp.err)
         return 1;
     map = mrp.map;
@@ -234,7 +234,7 @@ int ring_ctrl(int start_type, int addr, int len)
     mmap_reg_param mrp;
     void *map;
     // mmap to regs
-    mrp = map_reg(CTRL_DEVICE, CTRL_REG_START_OFFSET);
+    mrp = map_reg(CTRL_REG_START_OFFSET);
     if (mrp.err)
         return 1;
     map = mrp.map;
@@ -266,10 +266,10 @@ int ring_ctrl(int start_type, int addr, int len)
         } while (status != CTRL_REG_STATUS_SUCCESS && status != CTRL_REG_STATUS_TIMEOUT && status != 9);
     }
 
-    umap_reg(mrp, CTRL_REG_START_OFFSET);
 #if DEBUG_MODE == 1
     printf("Ring and Process Success!\n");
 #endif
+    return umap_reg(mrp, CTRL_REG_START_OFFSET);
 }
 //************************************************************************************************************* */
 
@@ -306,23 +306,23 @@ int Load_Everywhere(char *device_name, int device_ram_addr, int *host_addr, int 
     size_t bytes_done = 0;
     int underflow = 0;
 
-    fd = open(device_name, O_RDWR);
+    fd = open(C2H_DEVICE, O_RDWR);
     if (fd < 0)
     {
         fprintf(stderr, "unable to open device %s, %d.\n",
-                device_name, fd);
+                C2H_DEVICE, fd);
         perror("open device");
         return -EINVAL;
     }
 
-    rc = read_to_buffer(device_name, fd, (char *)host_addr, data_size * 4, device_ram_addr);
+    rc = read_to_buffer(C2H_DEVICE, fd, (char *)host_addr, data_size * 4, device_ram_addr);
     if (rc < 0)
         goto out;
     bytes_done = rc;
 
     if (bytes_done < data_size)
     {
-        fprintf(stderr, "underflow %ld/%ld.\n",
+        fprintf(stderr, "underflow %ld/%d.\n",
                 bytes_done, data_size);
         underflow = 1;
     }
@@ -358,17 +358,17 @@ int Store_Everywhere(char *device_name, int device_ram_addr, int *host_addr, int
     size_t bytes_done = 0;
     int underflow = 0;
 
-    fd = open(device_name, O_RDWR);
+    fd = open(H2C_DEVICE, O_RDWR);
     if (fd < 0)
     {
         fprintf(stderr, "unable to open device %s, %d.\n",
-                device_name, fd);
+                H2C_DEVICE, fd);
         perror("open device");
         return -EINVAL;
     }
 
     /* write buffer to AXI MM address using SGDMA */
-    rc = write_from_buffer(device_name, fd, (char *)host_addr, data_size * 4, device_ram_addr);
+    rc = write_from_buffer(H2C_DEVICE, fd, (char *)host_addr, data_size * 4, device_ram_addr);
     if (rc < 0)
         goto out;
 
@@ -376,7 +376,7 @@ int Store_Everywhere(char *device_name, int device_ram_addr, int *host_addr, int
 
     if (bytes_done < data_size)
     {
-        printf("underflow %ld/%ld.\n",
+        printf("underflow %ld/%d.\n",
                bytes_done, data_size);
         underflow = 1;
     }
@@ -419,16 +419,15 @@ int Send(char *device_name, int macro_row, int macro_col, int ip_addr, int mram_
     ssize_t rc = 0;
     uint32_t *cmd_buffer = NULL;
     int pos = 0;
-    int cmd_size = sizeof(Controll_Command);
     // avoid platform difference
     uint32_t *data_src = (uint32_t *)host_data_addr;
 
     // 4byte start_cmd + 4byte addr_cmd + (4byte input_cmd)*(2 * data_size) + 4byte end_cmd = 12 + 8*data_size byte
-    int cmd_buf_size = 8 * data_size + 4096;
+    long int cmd_buf_size = 8 * data_size + 4096;
     posix_memalign((void **)&cmd_buffer, 4096 /*alignment */, cmd_buf_size);
     if (!cmd_buffer)
     {
-        fprintf(stderr, "OOM %lu.\n", cmd_buf_size);
+        fprintf(stderr, "OOM %ld.\n", cmd_buf_size);
         rc = -ENOMEM;
         goto out;
     }
@@ -487,14 +486,13 @@ int Recv(char *send_device_name, char *recv_device_name, int macro_row, int macr
     uint32_t *cmd_buffer = NULL;
     uint32_t *raw_res_buffer = NULL;
     int pos = 0;
-    int cmd_size = sizeof(Controll_Command);
 
     // 4Byte start_cmd + (4Byte addr_cmd)*data_size + 4Byte end_cmd = 6 + 4*data_size byte
-    int cmd_buf_size = 4 * data_size + 4096;
+    long int cmd_buf_size = 4 * data_size + 4096;
     posix_memalign((void **)&cmd_buffer, 4096 /*alignment */, cmd_buf_size);
     if (!cmd_buffer)
     {
-        fprintf(stderr, "OOM %lu.\n", cmd_buf_size);
+        fprintf(stderr, "OOM %ld.\n", cmd_buf_size);
         rc = -ENOMEM;
         goto out;
     }
@@ -541,6 +539,7 @@ int Recv(char *send_device_name, char *recv_device_name, int macro_row, int macr
     fd = open(recv_device_name, O_RDWR);
     rc = read_to_buffer(recv_device_name, fd, (char *)raw_res_buffer, data_size * 2 * 4, RES_DATA_AREA_START_OFFSET);
     // recombination the result
+    // Low 16bit data is firstly transmitted
     for (i = 0; i < data_size; i++)
         host_data_addr[i] = raw_res_buffer[i * 2 + 1] + (raw_res_buffer[i * 2] << 16);
 
@@ -569,7 +568,7 @@ int Vmmul(char *device_name, char *recv_device_name, int *input_vector, int inpu
 
     // 4byte start_cmd + 4Byte calc_cmd + (4Byte input_cmd)*(actived_macro_row_num * fifo_length * (512 / 16))
     // + (4Byte addr_cmd)*(in_group * wbits * actived_macro_size * (512 / 32)) + 4Byte end_cmd = 12 + 3*data_size byte
-    int cmd_buf_size = 4 * (actived_macro_row_num * 512 + in_group * wbits * actived_macro_size * 16) + 4096;
+    long int cmd_buf_size = 4 * (actived_macro_row_num * 512 + in_group * wbits * actived_macro_size * 16) + 4096;
     posix_memalign((void **)&cmd_buffer, 4096 /*alignment */, cmd_buf_size);
     if (!cmd_buffer)
     {
@@ -724,7 +723,7 @@ out:
     return rc;
 }
 
-int Vvdmu(char *device_name, int ram_vector_addr, int ram_vector_size, int inbits, int in_group, int macro_row, int macro_col, int mram_addr, int wbits, int device_ram_addr);
+int Vvdmu(int ram_vector_addr, int ram_vector_size, int inbits, int in_group, int macro_row, int macro_col, int mram_addr, int wbits, int device_ram_addr);
 
 int Vvadd(char *device_name, int *input_vector, int input_size, int ram_vector_addr, int device_ram_addr);
 
@@ -734,12 +733,14 @@ int Vvadd(char *device_name, int *input_vector, int input_size, int ram_vector_a
 
 int Wait(int macro_row, int macro_col)
 {
-    printf("Macro(%d, %d) is Locked", macro_row, macro_col);
+    printf("Macro(%d, %d) is Locked\n", macro_row, macro_col);
+    return 0;
 }
 
 int Wakeup(int macro_row, int macro_col)
 {
-    printf("Macro(%d, %d) is Unlocked", macro_row, macro_col);
+    printf("Macro(%d, %d) is Unlocked\n", macro_row, macro_col);
+    return 0;
 }
 
 int Init()

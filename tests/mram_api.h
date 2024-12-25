@@ -12,7 +12,6 @@ int Init();
  * @brief Read data from Macro to onboard RAM. The data_size identifies the length of
  * data to be read, in 32bit
  *
- * @param device_name the device to be opened, eg. /dev/xdma0_h2c_0
  * @param macro_row the macro array shape is 4x4, row number range is [0, 3]
  * @param macro_col the macro array shape is 4x4, col number range is [0, 3]
  * @param ip_addr a macro contains 4 MRAM IPs, range is [0, 3]
@@ -27,7 +26,6 @@ int Vread(char *device_name, int macro_row, int macro_col, int ip_addr, int mram
  * @brief Write data from onboard RAM to Macro. The data_size identifies the length of
  * data to be write, in 32bit
  *
- * @param device_name the device to be opened, eg. /dev/xdma0_h2c_0
  * @param macro_row the macro array shape is 4x4, row number range is [0, 3]
  * @param macro_colthe the macro array shape is 4x4, col number range is [0, 3]
  * @param ip_addr a macro contains 4 MRAM IPs, range is [0, 3]
@@ -46,7 +44,6 @@ int Vwrite(char *device_name, int macro_row, int macro_col, int ip_addr, int mra
  * int calc_result[4];
  * Load("/dev/xdma0_c2h_0", 0x0004, calc_result, 4);
  *
- * @param device_name the device to be opened, eg. /dev/xdma0_c2h_0
  * @param device_ram_addr the RAM address on the device. If use axi-stream, this should always be 0
  * @param host_addr host buffer address, in 32bits
  * @param data_size  identifies the length of param 'host_addr', in 32bits
@@ -62,7 +59,6 @@ int Load(char *device_name, int device_ram_addr, int *host_addr, int data_size);
  * int cmd[3] = {0x00410001, 0x00410002, 0x00215555};
  * Load("/dev/xdma0_h2c_0", device_ram_addr, cmd, 3);
  *
- * @param device_name the device to be opened, eg. /dev/xdma0_h2c_0
  * @param device_ram_addr the RAM address on the device. If use axi-stream, this should always be 0
  * @param host_addr host buffer address, in 32bits
  * @param data_size identifies the length of param 'host_addr'
@@ -85,7 +81,6 @@ int Store(char *device_name, int device_ram_addr, int *host_addr, int data_size)
  * Send("/dev/xdma0_h2c_0", 0, 1, 2, 0, (int *)(weight_in_bits[2]), 5 * 16);
  * Send("/dev/xdma0_h2c_0", 0, 1, 3, 0, (int *)(weight_in_bits[3]), 5 * 16);
  *
- * @param device_name the device to be opened, eg. /dev/xdma0_h2c_0
  * @param macro_row the macro array shape is 4x4, row number range is [0, 3]
  * @param macro_col the macro array shape is 4x4, colum number range is [0, 3]
  * @param ip_addr a macro contains 4 MRAM IPs, range is [0, 3]
@@ -106,8 +101,6 @@ int Send(char *device_name, int macro_row, int macro_col, int ip_addr, int mram_
  * // The data received is a bit slice and needs to be restored. Omitting the restoring process.
  * int weight[512] = restore(weight_in_bits);
  *
- * @param send_device_name the device opened to transfer command, eg. /dev/xdma0_h2c_0
- * @param recv_device_name the device opened to receive read data, eg. /dev/xdma0_c2h_0
  * @param macro_row the macro array shape is 4x4, row number range is [0, 3]
  * @param macro_col the macro array shape is 4x4, colum number range is [0, 3]
  * @param ip_addr a macro contains 4 MRAM IPs, range is [0, 3]
@@ -145,8 +138,6 @@ int Recv(char *send_device_name, char *recv_device_name, int macro_row, int macr
  * int res_host_buffer[1 * 1];
  * Vmmul("/dev/xdma0_h2c_0", (int *)vector_filledin_bits, 5 * 16, 5, 1, 0, 1, 0x0008, 5, res_host_buffer)
  *
- * @param device_name the device to be opened, eg. /dev/xdma0_h2c_0
- * @param recv_device_name the device opened to receive read data, eg. /dev/xdma0_c2h_0
  * @param input_vector input vector array, each element is 32bit. Array shape is [actived_macro_row_num][in_group][inbits][16].
  * @param input_size identifies the length of param 'input_vector', in 32bits
  * @param inbits the bit width of all input element. Determined by the maximum value in the input vector.
@@ -185,7 +176,6 @@ int Vmmul(char *device_name, char *recv_device_name, int *input_vector, int inpu
  * unsiged int calc_result[4];
  * Load("/dev/xdma0_c2h_0", res_addr, calc_result, 4);
  *
- * @param device_name the device to be opened, eg. /dev/xdma0_h2c_0
  * @param ram_vector_addr input vector array address, each element is 32bit. Array shape is [actived_macro_row_num][in_group][inbits][16].
  * @param ram_vector_size identifies the length of param 'ram_vector_addr', in 32bits
  * @param inbits the bit width of all input element. Determined by the maximum value in the input vector.
@@ -197,7 +187,7 @@ int Vmmul(char *device_name, char *recv_device_name, int *input_vector, int inpu
  * @param device_ram_addr the RAM address of the calculation result
  * @return int not zero means error
  */
-int Vvdmu(char *device_name, int ram_vector_addr, int ram_vector_size, int inbits, int in_group, int macro_row, int macro_col, int mram_addr, int wbits, int device_ram_addr);
+int Vvdmu(int ram_vector_addr, int ram_vector_size, int inbits, int in_group, int macro_row, int macro_col, int mram_addr, int wbits, int device_ram_addr);
 
 /**
  * @brief Vector vector add. One vector is from host input, the other is form onboard RAm. Results are stored in the
@@ -209,7 +199,6 @@ int Vvdmu(char *device_name, int ram_vector_addr, int ram_vector_size, int inbit
  * res_addr = 0x1000;
  * Vvadd("/dev/xdma0_h2c_0", input, 28, ram_addr, res_addr);
  *
- * @param device_name the device to be opened, eg. /dev/xdma0_h2c_0
  * @param input_vector input vector array, each element is 32bit.
  * @param input_size identifies the length of param 'input_vector'
  * @param ram_vector_addr the RAM address of another vector. The length of another vector is the same as param 'input_size'.
@@ -250,12 +239,11 @@ int Wakeup(int macro_row, int macro_col);
  * @example set the value of reg WEIGHT_BASE_ADDR to 0x00010000
  * Sldi("/dev/xdma0_control", 0x00010000, REG_WEIGHT_BASE_ADDR_OFFSET)
  *
- * @param device_name the device to be opened, eg. /dev/xdma0_control
  * @param imm 32bit immediate value
  * @param reg_addr reg address/offset
  * @return int not zero means error
  */
-int Sldi(char *device_name, unsigned int imm, int reg_addr);
+int Sldi(unsigned int imm, int reg_addr);
 
 /**
  * @brief Assigns the value of reg_addr_from to reg_addr_to.
@@ -263,25 +251,23 @@ int Sldi(char *device_name, unsigned int imm, int reg_addr);
  * @example Assigns the value of MACRO_SEL to WEIGHT_BASE_ADDR.
  * Sld("/dev/xdma0_control", REG_MACRO_SEL_OFFSET, REG_WEIGHT_BASE_ADDR_OFFSET)
  *
- * @param device_name the device to be opened, eg. /dev/xdma0_control
  * @param reg_addr_from reg address/offset from
  * @param reg_addr_to reg address/offset to
  * @return int not zero means error
  */
-int Sld(char *device_name, int reg_addr_from, int reg_addr_to);
+int Sld(int reg_addr_from, int reg_addr_to);
 
 /**
  * @brief Read the value of the reg_addr and pass it to host_addr.
  * Reg_addr is defined in mram_config.h
  * @example Read the value of the reg WEIGHT_BASE_ADDR
- * unsigned int weight_base_addr;
+ * int weight_base_addr;
  * Ldr("/dev/xdma0_control", REG_WEIGHT_BASE_ADDR_OFFSET, &weight_base_addr);
  *
- * @param device_name the device to be opened, eg. /dev/xdma0_control
  * @param reg_addr reg address/offset
  * @param host_addr host buffer address
  * @return int not zero means error
  */
-int Ldr(char *device_name, int reg_addr, unsigned int *host_addr);
+int Ldr(int reg_addr, unsigned int *host_addr);
 
 #endif
