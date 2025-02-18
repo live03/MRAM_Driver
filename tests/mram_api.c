@@ -668,6 +668,7 @@ int Vmmul(char* device_name, char* recv_device_name, int* input_vector, int inpu
 		host_data_addr[i * 4 + 3] = (((raw_res_buffer[i * 7 + 2] & 0x1F) >> 4) == 1 ? 0xFE000000 : 0x00000000) + ((raw_res_buffer[i * 7 + 2] & 0x1F) << 20) + (raw_res_buffer[i * 7 + 1] << 4) + (raw_res_buffer[i * 7] >> 12);
 	}
 out:
+	close(fd);
 	free(cmd_buffer);
 	return rc;
 }
