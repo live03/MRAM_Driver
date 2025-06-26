@@ -46,6 +46,7 @@
 
 #define REG_ADDR_OFFSET 0x40000000
 #define BRAM_ADDR_OFFSET 0xC0000000
+#define DRAM_ADDR_OFFSET 0x00000000
 // Memory is divided into instruction areas and data areas
 // total memroy space is 128KB, memory map as follows:
 // 0x0000_0000 ~ 0x0000_FFFF --> data areas

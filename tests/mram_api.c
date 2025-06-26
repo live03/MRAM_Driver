@@ -227,7 +227,7 @@ int ring_ctrl(int start_type, int addr, int len) {
 		return 1;
 	map = mrp.map;
 	for (i = 0; i < left_count; i++) {
-		each_addr = BRAM_ADDR_OFFSET + addr + burst_len * 4 * i;
+		each_addr = DRAM_ADDR_OFFSET + addr + burst_len * 4 * i;
 		each_len = i == left_count - 1 && len % burst_len != 0 ? len % burst_len : burst_len;
 
 #if DEBUG_MODE == 1

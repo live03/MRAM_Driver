@@ -46,7 +46,7 @@ ssize_t read_to_buffer(char *fname, int fd, char *buffer, uint64_t size,
 	ssize_t rc;
 	uint64_t count = 0;
 	char *buf = buffer;
-	off_t offset = base + BRAM_ADDR_OFFSET;
+	off_t offset = base + DRAM_ADDR_OFFSET;
 	int loop = 0;
 
 	while (count < size) {
@@ -98,7 +98,7 @@ ssize_t write_from_buffer(char *fname, int fd, char *buffer, uint64_t size,
 	ssize_t rc;
 	uint64_t count = 0;
 	char *buf = buffer;
-	off_t offset = base + BRAM_ADDR_OFFSET;
+	off_t offset = base + DRAM_ADDR_OFFSET;
 	int loop = 0;
 
 	while (count < size) {
