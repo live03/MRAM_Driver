@@ -55,8 +55,8 @@
 // over 0x0001_FFFF means out of memory area
 //
 // DATA_AREA_START_OFFSET means data area start offset, also means max instruction area size
-#define INST_AREA_START_OFFSET 0x00010000
-#define RES_DATA_AREA_START_OFFSET 0x00018000
+#define INST_AREA_START_OFFSET 0x00100000
+#define RES_DATA_AREA_START_OFFSET 0x00180000
 
 // #define REG_WEIGHT_GRANULARITY_OFFSET 0x00
 // #define REG_INPUT_GRANULARITY_OFFSET 0x04
