@@ -6,6 +6,7 @@
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <assert.h>
 
 #include "dma_utils.h"
 #include "mram_api.h"

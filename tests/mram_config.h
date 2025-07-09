@@ -46,6 +46,7 @@
 
 #define REG_ADDR_OFFSET 0x40000000
 #define BRAM_ADDR_OFFSET 0x80000000
+//#define DRAM_ADDR_OFFSET 0x80000000
 #define DRAM_ADDR_OFFSET 0xC0000000
 // Memory is divided into instruction areas and data areas
 // total memroy space is 128KB, memory map as follows:
@@ -57,6 +58,8 @@
 // DATA_AREA_START_OFFSET means data area start offset, also means max instruction area size
 #define INST_AREA_START_OFFSET 0x00080000
 #define RES_DATA_AREA_START_OFFSET 0x000c0000
+//#define INST_AREA_START_OFFSET 0x00010000
+//#define RES_DATA_AREA_START_OFFSET 0x00018000
 
 // #define REG_WEIGHT_GRANULARITY_OFFSET 0x00
 // #define REG_INPUT_GRANULARITY_OFFSET 0x04

@@ -230,16 +230,16 @@ if __name__ == "__main__":
     mram_dll.Init()
 
     # 容量测试: 全0数据
-    # capacity_test(rows=4, cols=4, ips=4, mram_addrs=32768, type="Zero")
+    #capacity_test(rows=4, cols=4, ips=4, mram_addrs=32768, type="Zero")
 
     # # # 容量测试: 全1数据
-    # capacity_test(rows=4, cols=4, ips=4, mram_addrs=32768, type="One")
+    #capacity_test(rows=4, cols=4, ips=4, mram_addrs=32768, type="One")
 
     # # # 容量测试: 随机数据
-    # capacity_test(rows=4, cols=4, ips=4, mram_addrs=32768, type="Random")
+    capacity_test(rows=4, cols=4, ips=4, mram_addrs=32768, type="Random")
     
     # # 计算测试: 随机单Macro 1-8bit计算
-    for inbits in [1, 2, 4, 8]:
+    '''for inbits in [1, 2, 4, 8]:
         for wbits in [1, 2, 4, 8]:
             calculate_test(inbits=inbits, wbits=wbits, in_group=1, macro_row=random.randint(0,3), macro_col=random.randint(0,3))
 
@@ -251,4 +251,4 @@ if __name__ == "__main__":
     # # 计算测试: 单Macro 8bit计算
     for mr in range(4):
         for mc in range(4):
-            calculate_test(inbits=8, wbits=8, in_group=1, macro_row=mr, macro_col=mc)
+            calculate_test(inbits=8, wbits=8, in_group=1, macro_row=mr, macro_col=mc)'''
