@@ -30,7 +30,7 @@ def eq(a, b):
 
 def program_verify(retry_times,send_data, data_size):
     recv_data = (ctypes.c_int32 * data_size)()
-    device_ram_addr = random.randrange(0x0,0x4FFFFFFF+1,4)
+    device_ram_addr = random.randrange(0x0,0x4FFFFFF+1,4)
     for _ in range(retry_times):
         err = mram_dll.Store_Everywhere(H2C_DEVICE, device_ram_addr, send_data, data_size)
         if err:
